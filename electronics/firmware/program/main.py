@@ -46,24 +46,24 @@ def setup():
     # Initial Motors Direction
     motorObj.setMotorDirection(0, motorObj.MOTOR_DIR_CW)
     motorObj.setMotorDirection(1, motorObj.MOTOR_DIR_CCW)
-    # motorObj.setMotorDirection(2, MOTOR_DIR_CW)
-    # motorObj.setMotorDirection(3, MOTOR_DIR_CCW)
+    motorObj.setMotorDirection(2, motorObj.MOTOR_DIR_CW)
+    motorObj.setMotorDirection(3, motorObj.MOTOR_DIR_CCW)
 
     # Initial Motors Speeds
     MotorDriver.setDutyCycle(motorObj.motor_pwm_pin[0], 0)
     MotorDriver.setDutyCycle(motorObj.motor_pwm_pin[1], 0)
-    # MotorDriver.setDutyCycle(motorObj.motor_pwm_pin[2], 0)
-    # MotorDriver.setDutyCycle(motorObj.motor_pwm_pin[3], 0)
+    MotorDriver.setDutyCycle(motorObj.motor_pwm_pin[2], 0)
+    MotorDriver.setDutyCycle(motorObj.motor_pwm_pin[3], 0)
 
     # Debug
     # print(motorObj.motor_pwm_pin)
     # print(motorObj.motor_dir_pin)
     # input("Press")
 
-    motorObj.goForward(0.4, 1)
-    motorObj.goRear(0.4, 1)
-    motorObj.turnLeft(0.4, 1)
-    motorObj.turnRight(0.4, 1)
+    # motorObj.goForward(0.4, 5)
+    # motorObj.goRear(0.4, 5)
+    # motorObj.turnLeft(0.4, 5)
+    motorObj.turnRight(0.4, 5)
 
 # Create a main function:
 def loop():

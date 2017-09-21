@@ -50,14 +50,12 @@ class MotorDriver(object):
         self.motor_dir_pin[1][1] = GPIO0_5  # P9_17
 
         # Motor 2 Direction Pins
-        # TODO: Terminar
-        # self.motor_dir_pin[2][0] = GPIOX_XX # PX_XX
-        # self.motor_dir_pin[2][1] = GPIOX_XX # PX_XX
+        self.motor_dir_pin[2][0] = GPIO0_13 # P9_19
+        self.motor_dir_pin[2][1] = GPIO0_3 # P9_21
 
         # Motor 3 Direction Pins
-        # TODO: Terminar
-        # self.motor_dir_pin[3][0] = GPIOX_XX # PX_XX
-        # self.motor_dir_pin[3][1] = GPIOX_XX # PX_XX
+        self.motor_dir_pin[3][0] = GPIO1_17 # P9_23
+        self.motor_dir_pin[3][1] = GPIO3_21 # P9_25
 
         # Pins Configuration
         pinMode(self.motor_dir_pin[0][0], OUTPUT)
@@ -66,14 +64,11 @@ class MotorDriver(object):
         pinMode(self.motor_dir_pin[1][0], OUTPUT)
         pinMode(self.motor_dir_pin[1][1], OUTPUT)
 
-        # TODO: Terminar
-        # pinMode(self.motor_dir_pin[2][0], OUTPUT)
-        # pinMode(self.motor_dir_pin[2][1], OUTPUT)
+        pinMode(self.motor_dir_pin[2][0], OUTPUT)
+        pinMode(self.motor_dir_pin[2][1], OUTPUT)
 
-        # TODO: Terminar
-        # pinMode(self.motor_dir_pin[3][0], OUTPUT)
-        # pinMode(self.motor_dir_pin[3][1], OUTPUT)
-
+        pinMode(self.motor_dir_pin[3][0], OUTPUT)
+        pinMode(self.motor_dir_pin[3][1], OUTPUT)
 
     # digitalWrite(GPIO0,HIGH)
     # digitalWrite(GPIO1,LOW)
@@ -92,18 +87,18 @@ class MotorDriver(object):
         duty = round(255*duty_float)
         analogWrite(pwm_pin, duty) # duty range: 0-255
 
-    def goForward(self,speed, time):
+    def goRear(self,speed, time):
         # Set Motors direction for going forward
         self.setMotorDirection(0, self.MOTOR_DIR_CW)
         self.setMotorDirection(1, self.MOTOR_DIR_CCW)
-        # self.setMotorDirection(2, self.MOTOR_DIR_X)
-        # self.setMotorDirection(3, self.MOTOR_DIR_X)
+        self.setMotorDirection(2, self.MOTOR_DIR_CCW)
+        self.setMotorDirection(3, self.MOTOR_DIR_CW)
 
         # Set the desired speed to the motors
         MotorDriver.setDutyCycle(self.motor_pwm_pin[0], speed)
         MotorDriver.setDutyCycle(self.motor_pwm_pin[1], speed)
-        # MotorDriver.setDutyCycle(self.motor_pwm_pin[2], speed)
-        # MotorDriver.setDutyCycle(self.motor_pwm_pin[3], speed)
+        MotorDriver.setDutyCycle(self.motor_pwm_pin[2], speed)
+        MotorDriver.setDutyCycle(self.motor_pwm_pin[3], speed)
 
         # Sleep a bit:
         sleep(time)
@@ -111,21 +106,21 @@ class MotorDriver(object):
         # Stops the Motors
         MotorDriver.setDutyCycle(self.motor_pwm_pin[0], 0)
         MotorDriver.setDutyCycle(self.motor_pwm_pin[1], 0)
-        # MotorDriver.setDutyCycle(self.motor_pwm_pin[2], 0)
-        # MotorDriver.setDutyCycle(self.motor_pwm_pin[3], 0)
+        MotorDriver.setDutyCycle(self.motor_pwm_pin[2], 0)
+        MotorDriver.setDutyCycle(self.motor_pwm_pin[3], 0)
 
-    def goRear(self,speed,time):
+    def goForward(self,speed,time):
         # Set Motors direction for going forward
         self.setMotorDirection(0, self.MOTOR_DIR_CCW)
         self.setMotorDirection(1, self.MOTOR_DIR_CW)
-        # self.setMotorDirection(2, self.MOTOR_DIR_X)
-        # self.setMotorDirection(3, self.MOTOR_DIR_X)
+        self.setMotorDirection(2, self.MOTOR_DIR_CW)
+        self.setMotorDirection(3, self.MOTOR_DIR_CCW)
 
         # Set the desired speed to the motors
         MotorDriver.setDutyCycle(self.motor_pwm_pin[0], speed)
         MotorDriver.setDutyCycle(self.motor_pwm_pin[1], speed)
-        # MotorDriver.setDutyCycle(self.motor_pwm_pin[2], speed)
-        # MotorDriver.setDutyCycle(self.motor_pwm_pin[3], speed)
+        MotorDriver.setDutyCycle(self.motor_pwm_pin[2], speed)
+        MotorDriver.setDutyCycle(self.motor_pwm_pin[3], speed)
 
         # Sleep a bit:
         sleep(time)
@@ -133,21 +128,21 @@ class MotorDriver(object):
         # Stops the Motors
         MotorDriver.setDutyCycle(self.motor_pwm_pin[0], 0)
         MotorDriver.setDutyCycle(self.motor_pwm_pin[1], 0)
-        # MotorDriver.setDutyCycle(self.motor_pwm_pin[2], 0)
-        # MotorDriver.setDutyCycle(self.motor_pwm_pin[3], 0)
+        MotorDriver.setDutyCycle(self.motor_pwm_pin[2], 0)
+        MotorDriver.setDutyCycle(self.motor_pwm_pin[3], 0)
 
     def turnLeft(self,speed, time):
         # Set Motors direction for going forward
         self.setMotorDirection(0, self.MOTOR_DIR_CW)
         self.setMotorDirection(1, self.MOTOR_DIR_CW)
-        # self.setMotorDirection(2, self.MOTOR_DIR_X)
-        # self.setMotorDirection(3, self.MOTOR_DIR_X)
+        self.setMotorDirection(2, self.MOTOR_DIR_CCW)
+        self.setMotorDirection(3, self.MOTOR_DIR_CCW)
 
         # Set the desired speed to the motors
         MotorDriver.setDutyCycle(self.motor_pwm_pin[0], speed)
         MotorDriver.setDutyCycle(self.motor_pwm_pin[1], speed)
-        # MotorDriver.setDutyCycle(self.motor_pwm_pin[2], speed)
-        # MotorDriver.setDutyCycle(self.motor_pwm_pin[3], speed)
+        MotorDriver.setDutyCycle(self.motor_pwm_pin[2], speed)
+        MotorDriver.setDutyCycle(self.motor_pwm_pin[3], speed)
 
         # Sleep a bit:
         sleep(time)
@@ -155,21 +150,21 @@ class MotorDriver(object):
         # Stops the Motors
         MotorDriver.setDutyCycle(self.motor_pwm_pin[0], 0)
         MotorDriver.setDutyCycle(self.motor_pwm_pin[1], 0)
-        # MotorDriver.setDutyCycle(self.motor_pwm_pin[2], 0)
-        # MotorDriver.setDutyCycle(self.motor_pwm_pin[3], 0)
+        MotorDriver.setDutyCycle(self.motor_pwm_pin[2], 0)
+        MotorDriver.setDutyCycle(self.motor_pwm_pin[3], 0)
 
     def turnRight(self,speed,time):
         # Set Motors direction for going forward
         self.setMotorDirection(0, self.MOTOR_DIR_CCW)
         self.setMotorDirection(1, self.MOTOR_DIR_CCW)
-        # self.setMotorDirection(2, self.MOTOR_DIR_X)
-        # self.setMotorDirection(3, self.MOTOR_DIR_X)
+        self.setMotorDirection(2, self.MOTOR_DIR_CW)
+        self.setMotorDirection(3, self.MOTOR_DIR_CW)
 
         # Set the desired speed to the motors
         MotorDriver.setDutyCycle(self.motor_pwm_pin[0], speed)
         MotorDriver.setDutyCycle(self.motor_pwm_pin[1], speed)
-        # MotorDriver.setDutyCycle(self.motor_pwm_pin[2], speed)
-        # MotorDriver.setDutyCycle(self.motor_pwm_pin[3], speed)
+        MotorDriver.setDutyCycle(self.motor_pwm_pin[2], speed)
+        MotorDriver.setDutyCycle(self.motor_pwm_pin[3], speed)
 
         # Sleep a bit:
         sleep(time)
@@ -177,5 +172,5 @@ class MotorDriver(object):
         # Stops the Motors
         MotorDriver.setDutyCycle(self.motor_pwm_pin[0], 0)
         MotorDriver.setDutyCycle(self.motor_pwm_pin[1], 0)
-        # MotorDriver.setDutyCycle(self.motor_pwm_pin[2], 0)
-        # MotorDriver.setDutyCycle(self.motor_pwm_pin[3], 0)
+        MotorDriver.setDutyCycle(self.motor_pwm_pin[2], 0)
+        MotorDriver.setDutyCycle(self.motor_pwm_pin[3], 0)
