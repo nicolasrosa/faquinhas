@@ -1,19 +1,29 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
 import cv2
 import numpy as np
+from object import Object
+
+# TODO: Terminar
+#include "Object.h"
 
 # initial min and max HSV filter values.
 # these will be changed using trackbars
+HUE_TRACKBAR_MAX_VALUE = 179
+SATURATION_TRACKBAR_MAX_VALUE = 255
+VALUE_TRACKBAR_MAX_VALUE = 255
+
 H_MIN = 0
-H_MAX = 71
-S_MIN = 76
-S_MAX = 238
-V_MIN = 98
-V_MAX = 220
+H_MAX = 21
+S_MIN = 156
+S_MAX = 255
+V_MIN = 88
+V_MAX = 186
 # default capture width and height
 FRAME_WIDTH = 640
 FRAME_HEIGHT = 480
 # max number of objects to be detected in frame
-MAX_NUM_OBJECTS=50
+MAX_NUM_OBJECTS=25
 # minimum and maximum object area
 MIN_OBJECT_AREA = 20*20
 MAX_OBJECT_AREA = FRAME_HEIGHT*FRAME_WIDTH/1.5
@@ -25,11 +35,21 @@ windowName3 = "After Morphological Operations"
 windowName4 = "Equalized"
 trackbarWindowName = "Trackbars"
 
+# TODO: Terminar
+# //The following for canny edge detec
+# Mat dst, detected_edges
+# Mat src, src_gray
+# int edgeThresh = 1
+# int lowThreshold
+# int const max_lowThreshold = 100
+# int ratio = 3
+# int kernel_size = 3
+# const char* window_name = "Edge Map"
+
 def on_trackbar(value):
     #This function gets called whenever a
     # trackbar position is changed
     pass
-
 
 def createTrackbars():
     # create window for trackbars
@@ -41,14 +61,23 @@ def createTrackbars():
     # the max value the trackbar can move (eg. H_HIGH),
     # and the function that is called whenever the trackbar is moved(eg. on_trackbar)
     #                                   ---->    ---->     ---->
-    cv2.createTrackbar( "H_MIN", trackbarWindowName, H_MIN, H_MAX, on_trackbar )
-    cv2.createTrackbar( "H_MAX", trackbarWindowName, H_MAX, H_MAX, on_trackbar )
-    cv2.createTrackbar( "S_MIN", trackbarWindowName, S_MIN, S_MAX, on_trackbar )
-    cv2.createTrackbar( "S_MAX", trackbarWindowName, S_MAX, S_MAX, on_trackbar )
-    cv2.createTrackbar( "V_MIN", trackbarWindowName, V_MIN, V_MAX, on_trackbar )
-    cv2.createTrackbar( "V_MAX", trackbarWindowName, V_MAX, V_MAX, on_trackbar )
 
-def drawObject(x, y, frame):
+    cv2.createTrackbar( "H_MIN", trackbarWindowName, H_MIN, HUE_TRACKBAR_MAX_VALUE, on_trackbar )
+    cv2.createTrackbar( "H_MAX", trackbarWindowName, H_MAX, HUE_TRACKBAR_MAX_VALUE, on_trackbar )
+    cv2.createTrackbar( "S_MIN", trackbarWindowName, S_MIN, SATURATION_TRACKBAR_MAX_VALUE, on_trackbar )
+    cv2.createTrackbar( "S_MAX", trackbarWindowName, S_MAX, SATURATION_TRACKBAR_MAX_VALUE, on_trackbar )
+    cv2.createTrackbar( "V_MIN", trackbarWindowName, V_MIN, VALUE_TRACKBAR_MAX_VALUE, on_trackbar )
+    cv2.createTrackbar( "V_MAX", trackbarWindowName, V_MAX, VALUE_TRACKBAR_MAX_VALUE, on_trackbar )
+
+def drawObject(theObjects, frame):
+    for i in range(0, len(theObjects)):
+        cv2.circle(frame,(theObjects[i].getXPos(),theObjects[i].getYPos()),10,(0,0,255))
+        cv2.putText(frame,str(theObjects[i].getXPos())+ " , " + str(theObjects[i].getYPos()),(theObjects[i].getXPos(),theObjects[i].getYPos()+20),1,1,(0,255,0))
+        cv2.putText(frame,str(theObjects[i].getType()),(theObjects[i].getXPos(),theObjects[i].getYPos()-30),1,2,theObjects[i].getColor())
+
+    return frame
+
+def drawObject_old(x, y, frame):
     # use some of the openCV drawing functions to draw crosshairs
     # on your tracked image!
 
@@ -98,13 +127,13 @@ def morphOps(thresh):
     return thresh
 
 def trackFilteredObject(x, y, threshold, cameraFeed):
+    objects = []
     temp = threshold.copy()
     # these two vectors needed for output of findContours
     # find contours of filtered image using openCV findContours function
-    im2, contours, hierarchy = cv2.findContours(temp, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    _, contours, hierarchy = cv2.findContours(temp, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
     # Debug
-    # print(im2)
     # print(contours)
     # print(hierarchy) 
 
@@ -112,8 +141,8 @@ def trackFilteredObject(x, y, threshold, cameraFeed):
     refArea = 0
     objectFound = False
     
-    print(hierarchy)
-    print(len(hierarchy.shape))
+    # print(hierarchy)
+    # print(len(hierarchy.shape))
     numObjects = len(hierarchy.shape) if hierarchy is not None else 0
 
     # print(numObjects)
@@ -133,11 +162,13 @@ def trackFilteredObject(x, y, threshold, cameraFeed):
                 # we only want the object with the largest area so we safe a reference area each
                 # iteration and compare it to the area in the next iteration.
                 if(area>MIN_OBJECT_AREA and area<MAX_OBJECT_AREA and area>refArea):                     
-                    # input("Press")
-                    x = moment['m10']/area
-                    y = moment['m01']/area
+                    object = Object()
+                    object.setXPos(moment['m10']/area)
+                    object.setYPos(moment['m01']/area)
+
+                    objects.append(object)
                     objectFound = True
-                    refArea = area
+
                 else:
                     objectFound = False
 
@@ -153,9 +184,10 @@ def trackFilteredObject(x, y, threshold, cameraFeed):
             if(objectFound == True):
                 cv2.putText(cameraFeed,"Object Detected",(0,50),2,1,(0,255,0),2)
                 #  Draw Object Location on Screen
-                cameraFeed = drawObject(x,y,cameraFeed)
-            else:
-               cv2.putText(cameraFeed,"TOO MUCH NOISE! ADJUST FILTER",(0,50),1,2,(0,0,255),2)
+                # cameraFeed = drawObject(x,y,cameraFeed)
+                cameraFeed = drawObject(objects, cameraFeed)
+        else:
+           cv2.putText(cameraFeed,"TOO MUCH NOISE! ADJUST FILTER",(0,50),1,2,(0,0,255),2)
 
     return cameraFeed
 
@@ -177,7 +209,8 @@ def main():
     useMorphOps = True
 
     # x and y values for the location of the object
-    x=0; y=0
+    x=0
+    y=0
 
     # create slider bars for HSV filtering
     createTrackbars()
