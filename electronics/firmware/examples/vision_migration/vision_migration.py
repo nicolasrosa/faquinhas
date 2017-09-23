@@ -3,6 +3,8 @@
 import cv2
 import numpy as np
 from object import Object
+from segmentation import Segmentation
+
 
 # TODO: Terminar
 #include "Object.h"
@@ -13,12 +15,22 @@ HUE_TRACKBAR_MAX_VALUE = 179
 SATURATION_TRACKBAR_MAX_VALUE = 255
 VALUE_TRACKBAR_MAX_VALUE = 255
 
+# Segmenta as canetas
+# H_MIN = 0
+# H_MAX = 211
+# S_MIN = 156
+# S_MAX = 255
+# V_MIN = 88
+# V_MAX = 186
+
+COLOR = 0
 H_MIN = 0
-H_MAX = 21
-S_MIN = 156
+H_MAX = 179
+S_MIN = 0
 S_MAX = 255
-V_MIN = 88
-V_MAX = 186
+V_MIN = 0
+V_MAX = 255
+
 # default capture width and height
 FRAME_WIDTH = 640
 FRAME_HEIGHT = 480
@@ -34,6 +46,7 @@ windowName2 = "Filtered Thresholded Image"
 windowName3 = "After Morphological Operations"
 windowName4 = "Equalized"
 trackbarWindowName = "Trackbars"
+trackbarWindowName2 = "Trackbars2"
 
 # TODO: Terminar
 # //The following for canny edge detec
@@ -46,22 +59,42 @@ trackbarWindowName = "Trackbars"
 # int kernel_size = 3
 # const char* window_name = "Edge Map"
 
+def calib(numRobots):
+    listObjs = []
+    for i in range(0, numRobots):
+        listObjs.append(Segmentation())
+
+    return listObjs
+
+numRobots = int(input("Digite numero de cores a serem calibradas:"))
+listSegmObjs = calib(numRobots)
+
+def on_trackbar_colors(value):
+    # print(value)
+    # print(listSegmObjs[value].H_MIN)
+    # print(listSegmObjs[value].H_MAX)
+    # print(listSegmObjs[value].S_MIN)
+    # print(listSegmObjs[value].S_MAX)
+    # print(listSegmObjs[value].V_MIN)
+    # print(listSegmObjs[value].V_MAX)
+
+    cv2.setTrackbarPos("H_MIN", trackbarWindowName2, listSegmObjs[value].H_MIN)
+    cv2.setTrackbarPos("H_MAX", trackbarWindowName2, listSegmObjs[value].H_MAX)
+    cv2.setTrackbarPos("S_MIN", trackbarWindowName2, listSegmObjs[value].S_MIN)
+    cv2.setTrackbarPos("S_MAX", trackbarWindowName2, listSegmObjs[value].S_MAX)
+    cv2.setTrackbarPos("V_MIN", trackbarWindowName2, listSegmObjs[value].V_MIN)
+    cv2.setTrackbarPos("V_MAX", trackbarWindowName2, listSegmObjs[value].V_MAX)
+
+
 def on_trackbar(value):
     #This function gets called whenever a
-    # trackbar position is changed
+    # # trackbar position is changed
     pass
 
 def createTrackbars():
     # create window for trackbars
 
     cv2.namedWindow(trackbarWindowName, 0)
-    # create memory to store trackbar name on window
-    # create trackbars and insert them into window
-    # 3 parameters are: the address of the variable that is changing when the trackbar is moved(eg.H_LOW),
-    # the max value the trackbar can move (eg. H_HIGH),
-    # and the function that is called whenever the trackbar is moved(eg. on_trackbar)
-    #                                   ---->    ---->     ---->
-
     cv2.createTrackbar( "H_MIN", trackbarWindowName, H_MIN, HUE_TRACKBAR_MAX_VALUE, on_trackbar )
     cv2.createTrackbar( "H_MAX", trackbarWindowName, H_MAX, HUE_TRACKBAR_MAX_VALUE, on_trackbar )
     cv2.createTrackbar( "S_MIN", trackbarWindowName, S_MIN, SATURATION_TRACKBAR_MAX_VALUE, on_trackbar )
@@ -69,44 +102,22 @@ def createTrackbars():
     cv2.createTrackbar( "V_MIN", trackbarWindowName, V_MIN, VALUE_TRACKBAR_MAX_VALUE, on_trackbar )
     cv2.createTrackbar( "V_MAX", trackbarWindowName, V_MAX, VALUE_TRACKBAR_MAX_VALUE, on_trackbar )
 
+def createTrackbars2(numColors):
+    # create window for trackbars
+    cv2.namedWindow(trackbarWindowName2, 0)
+    cv2.createTrackbar( "Color", trackbarWindowName2, COLOR, numColors-1 , on_trackbar_colors )
+    cv2.createTrackbar( "H_MIN", trackbarWindowName2, H_MIN, HUE_TRACKBAR_MAX_VALUE, on_trackbar )
+    cv2.createTrackbar( "H_MAX", trackbarWindowName2, H_MAX, HUE_TRACKBAR_MAX_VALUE, on_trackbar )
+    cv2.createTrackbar( "S_MIN", trackbarWindowName2, S_MIN, SATURATION_TRACKBAR_MAX_VALUE, on_trackbar )
+    cv2.createTrackbar( "S_MAX", trackbarWindowName2, S_MAX, SATURATION_TRACKBAR_MAX_VALUE, on_trackbar )
+    cv2.createTrackbar( "V_MIN", trackbarWindowName2, V_MIN, VALUE_TRACKBAR_MAX_VALUE, on_trackbar )
+    cv2.createTrackbar( "V_MAX", trackbarWindowName2, V_MAX, VALUE_TRACKBAR_MAX_VALUE, on_trackbar )
+
 def drawObject(theObjects, frame):
     for i in range(0, len(theObjects)):
         cv2.circle(frame,(theObjects[i].getXPos(),theObjects[i].getYPos()),10,(0,0,255))
         cv2.putText(frame,str(theObjects[i].getXPos())+ " , " + str(theObjects[i].getYPos()),(theObjects[i].getXPos(),theObjects[i].getYPos()+20),1,1,(0,255,0))
         cv2.putText(frame,str(theObjects[i].getType()),(theObjects[i].getXPos(),theObjects[i].getYPos()-30),1,2,theObjects[i].getColor())
-
-    return frame
-
-def drawObject_old(x, y, frame):
-    # use some of the openCV drawing functions to draw crosshairs
-    # on your tracked image!
-
-    # UPDATE:JUNE 18TH, 2013
-    # added 'if' and 'else' statements to prevent
-    # memory errors from writing off the screen (ie. (-25,-25) is not within the window!)
-
-    x = int(x)
-    y = int(y)
-
-    cv2.circle(frame,(x,y),20,(0,255,0),2)
-    if(y-25>0):
-        cv2.line(frame,(x,y),(x,y-25),(0,255,0),2)
-    else:
-        cv2.line(frame,(x,y),(x,0),(0,255,0),2)
-    if(y+25<FRAME_HEIGHT):
-        cv2.line(frame,(x,y),(x,y+25),(0,255,0),2)
-    else:
-        cv2.line(frame,(x,y),(x,FRAME_HEIGHT),(0,255,0),2)
-    if(x-25>0):
-        cv2.line(frame,(x,y),(x-25,y),(0,255,0),2)
-    else:
-        cv2.line(frame,(x,y),(0,y),(0,255,0),2)
-    if(x+25<FRAME_WIDTH):
-        cv2.line(frame,(x,y),(x+25,y),(0,255,0),2)
-    else:
-        cv2.line(frame,(x,y),(FRAME_WIDTH,y),(0,255,0),2)
-
-    cv2.putText(frame,str(x)+","+str(y),(x,y+30),1,1,(0,255,0),2)
 
     return frame
 
@@ -126,7 +137,7 @@ def morphOps(thresh):
 
     return thresh
 
-def trackFilteredObject(x, y, threshold, cameraFeed):
+def trackFilteredObject(threshold, cameraFeed):
     objects = []
     temp = threshold.copy()
     # these two vectors needed for output of findContours
@@ -208,33 +219,41 @@ def main():
     trackObjects = True
     useMorphOps = True
 
-    # x and y values for the location of the object
-    x=0
-    y=0
-
-    # create slider bars for HSV filtering
+    # Create slider bars for HSV filtering
     createTrackbars()
+    createTrackbars2(numRobots)
 
-    # video capture object to acquire webcam feed
-    # capture object at location zero (default location for webcam)
+
+    # Video capture object to acquire webcam feed capture object at location zero (default location for webcam)
     capture = cv2.VideoCapture(0)
-    # set height and width of capture frame
 
+    # Set height and width of capture frame
     capture.set(cv2.CAP_PROP_FRAME_WIDTH,FRAME_WIDTH)
     capture.set(cv2.CAP_PROP_FRAME_HEIGHT,FRAME_HEIGHT)
-    # start an infinite loop where webcam feed is copied to cameraFeed matrix
-    # all of our operations will be performed within this loop
+
+    # Start an infinite loop where webcam feed is copied to cameraFeed matrix all of our operations will be performed within this loop
     while(1):
-        # store image to matrix
+        # Store image to matrix
         ret, cameraFeed = capture.read()
 
-        # get current positions of four trackbars
-        H_MIN = cv2.getTrackbarPos("H_MIN", trackbarWindowName)
-        H_MAX = cv2.getTrackbarPos("H_MAX", trackbarWindowName)
-        S_MIN = cv2.getTrackbarPos("S_MIN", trackbarWindowName)
-        S_MAX = cv2.getTrackbarPos("S_MAX", trackbarWindowName)
-        V_MIN = cv2.getTrackbarPos("V_MIN", trackbarWindowName)
-        V_MAX = cv2.getTrackbarPos("V_MAX", trackbarWindowName)
+        # for i in range(0, numRobots):
+        # Get current positions of four trackbars
+        # cv2.setTrackbarPos()
+
+        # H_MIN = cv2.getTrackbarPos("H_MIN", trackbarWindowName)
+        # H_MAX = cv2.getTrackbarPos("H_MAX", trackbarWindowName)
+        # S_MIN = cv2.getTrackbarPos("S_MIN", trackbarWindowName)
+        # S_MAX = cv2.getTrackbarPos("S_MAX", trackbarWindowName)
+        # V_MIN = cv2.getTrackbarPos("V_MIN", trackbarWindowName)
+        # V_MAX = cv2.getTrackbarPos("V_MAX", trackbarWindowName)
+
+        color = cv2.getTrackbarPos("Color", trackbarWindowName2)
+        listSegmObjs[color].H_MIN = cv2.getTrackbarPos("H_MIN", trackbarWindowName2)
+        listSegmObjs[color].H_MAX = cv2.getTrackbarPos("H_MAX", trackbarWindowName2)
+        listSegmObjs[color].S_MIN = cv2.getTrackbarPos("S_MIN", trackbarWindowName2)
+        listSegmObjs[color].S_MAX = cv2.getTrackbarPos("S_MAX", trackbarWindowName2)
+        listSegmObjs[color].V_MIN = cv2.getTrackbarPos("V_MIN", trackbarWindowName2)
+        listSegmObjs[color].V_MAX = cv2.getTrackbarPos("V_MAX", trackbarWindowName2)
 
         # Apply Histogram Equalization
         # equalizeHist(cameraFeed,cameraEq)
@@ -244,23 +263,27 @@ def main():
         HSV = cv2.cvtColor(cameraFeed,cv2.COLOR_BGR2HSV)
 
         # filter HSV image between values and store filtered image to threshold matrix
-        threshold = cv2.inRange(HSV,np.array([H_MIN,S_MIN,V_MIN]),np.array([H_MAX,S_MAX,V_MAX]))
+        threshold = []
+        for i in range(0,numRobots):
+            threshold.append(cv2.inRange(HSV,np.array([listSegmObjs[i].H_MIN,listSegmObjs[i].S_MIN,listSegmObjs[i].V_MIN]),np.array([listSegmObjs[i].H_MAX,listSegmObjs[i].S_MAX,listSegmObjs[i].V_MAX])))
 
-        cv2.imshow("Unfiltered thresholded Image",threshold)
-        # perform morphological operations on thresholded image to eliminate noise
-        # and emphasize the filtered object(s)
-        if(useMorphOps):
-            threshold = morphOps(threshold)
+            cv2.imshow("Unfiltered thresholded Image %d" % (i+1),threshold[i])
 
-        # Pass in thresholded frame to our object tracking function this function will return the x and y coordinates
-        # of the filtered object
-        if(trackObjects):
-            cameraFeed = trackFilteredObject(x,y,threshold, cameraFeed)
+            # perform morphological operations on thresholded image to eliminate noise
+            # and emphasize the filtered object(s)
+            if(useMorphOps):
+                threshold[i] = morphOps(threshold[i])
+
+            # Pass in thresholded frame to our object tracking function this function will return the x and y coordinates
+            # of the filtered object
+            if(trackObjects):
+                cameraFeed = trackFilteredObject(threshold[i], cameraFeed)
+
+            cv2.imshow("Filtered Thresholded Image %d" % (i+1), threshold[i])
 
         # Show frames
         cv2.imshow(windowName,cameraFeed)
         cv2.imshow(windowName1,HSV)
-        cv2.imshow(windowName2,threshold)
         cv2.imshow(windowName4,cameraEq)
 
         #  Delay 30ms so that screen can refresh.
@@ -269,6 +292,11 @@ def main():
         k = cv2.waitKey(5) & 0xFF
         if k == 27:
            break
+
+        # k = cv2.waitKey(5) & 0xFF
+        # if k == 99:
+        #     cv2.destroyWindow(trackbarWindowName)
+
 
     capture.release()
     cv2.destroyAllWindows()
