@@ -274,12 +274,13 @@ def main():
             if(useMorphOps):
                 threshold[i] = morphOps(threshold[i])
 
+            cv2.imshow("Filtered Thresholded Image %d" % (i+1), threshold[i])
+
             # Pass in thresholded frame to our object tracking function this function will return the x and y coordinates
             # of the filtered object
             if(trackObjects):
                 cameraFeed = trackFilteredObject(threshold[i], cameraFeed)
 
-            cv2.imshow("Filtered Thresholded Image %d" % (i+1), threshold[i])
 
         # Show frames
         cv2.imshow(windowName,cameraFeed)
