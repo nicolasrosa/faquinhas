@@ -23,17 +23,18 @@ from robotAI import *
 motorObj = MotorDriver()
 
 def manual():
-    # Get PWM duty cycle:
+    # Get and set PWM duty cycles:
     motor0_duty = float(input("motor0_duty: "))
-    motor1_duty = float(input("motor1_duty: "))
-    # motor2_duty = float(input("motor2_duty: "))
-    # motor3_duty = float(input("motor3_duty: "))
-
-    # Set the PWM duty cycle:
     MotorDriver.setDutyCycle(motorObj.motor_pwm_pin[0], motor0_duty)
+
+    motor1_duty = float(input("motor1_duty: "))
     MotorDriver.setDutyCycle(motorObj.motor_pwm_pin[1], motor1_duty)
-    # setDutyCycle(motor2_pwm, motor2_duty)
-    # setDutyCycle(motor3_pwm, motor3_duty)
+
+    motor2_duty = float(input("motor2_duty: "))
+    MotorDriver.setDutyCycle(motorObj.motor_pwm_pin[2], motor2_duty)
+
+    motor3_duty = float(input("motor3_duty: "))
+    MotorDriver.setDutyCycle(motorObj.motor_pwm_pin[3], motor3_duty)
 
 # ======
 #  Main
@@ -60,10 +61,10 @@ def setup():
     # print(motorObj.motor_dir_pin)
     # input("Press")
 
-    # motorObj.goForward(0.4, 5)
-    # motorObj.goRear(0.4, 5)
-    # motorObj.turnLeft(0.4, 5)
-    motorObj.turnRight(0.4, 5)
+    motorObj.goForward(0.5, 0.5)
+    # motorObj.goRear(0.5, 1)
+    # motorObj.turnLeft(0.6, 1)
+    # motorObj.turnRight(0.6, 1)
 
 # Create a main function:
 def loop():
